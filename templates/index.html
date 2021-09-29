@@ -54,6 +54,7 @@
             gtag('config', '{{ config.extra.google_analytics.id }}');
         </script>{% endif %}
 
+        {% if config.extra.dark_mode.automatic | default(value=true) %}
         <script>
             function setTheme() {
                 const time = new Date();
@@ -62,24 +63,25 @@
                 const date = String(time.getMonth() + 1) + '.' + String(time.getDate());
       
                 const now = time.getTime();
-                let sunrise;
-                let sunset;
+                let sunrise = [ {{ config.extra.dark_mode.default_sunrise_hour | default(value="7")}}, 0];
+                let sunset = [ {{ config.extra.dark_mode.default_sunset_hour | default(value="19") }}, 0];
       
                 function setBodyClass() {
-                    if (now > sunrise && now < sunset) return;
-                    document.body.classList.add('dark');
+                    if (now > sunrise && now < sunset) {
+                        document.body.classList.remove('dark');
+                    } else {
+                        document.body.classList.add('dark');
+                    }
                 }
-      
+                
+                {% if config.extra.dark_mode.geolocation_api_key %}
                 if (date !== prev) {
-                    fetch('https://api.ipgeolocation.io/astronomy?apiKey=5ed37d85103e4defa5df4c5298ed5215')
+                    setBodyClass();
+                    fetch('https://api.ipgeolocation.io/astronomy?apiKey={{ config.extra.dark_mode.geolocation_api_key }}')
                         .then(res => res.json())
                         .then(data => {
                             sunrise = data.sunrise.split(':').map(Number);
                             sunset = data.sunset.split(':').map(Number);
-                    })
-                    .catch(() => {
-                        sunrise = [7, 0];
-                        sunset = [19, 0];
                     })
                     .finally(() => {
                         sunrise = time.setHours(sunrise[0], sunrise[1], 0);
@@ -94,16 +96,32 @@
                     sunset = Number(localStorage.getItem('sunset'));
                     setBodyClass();
                 }
+                {% else %}
+                setBodyClass();
+                {% endif %}
             }
         </script>
+        {% endif %}
     </head>
+
+    {% set body_classes = [] %}
+    {% if page %}
+    {% set body_classes = body_classes | concat(with="single") %}
+    {% else %}
+    {% set body_classes = body_classes | concat(with="list") %}
+    {% endif %}
+    {% if config.extra.dark_mode.force %}
+    {% set body_classes = body_classes | concat(with="dark") %}
+    {% endif %}
+
+    <body class="{{ body_classes | join(sep=" ") }}">
     
-    {% if page %}<body class="single">{% else %}<body class="list">{% endif %}
-    
+    {% if config.extra.dark_mode.automatic | default(value=true) %}
     <!-- Apply theme -->
     <script>
       setTheme();
     </script>
+    {% endif %}
 
     {% block body %}
         <header class="header">

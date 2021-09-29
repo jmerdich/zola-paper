@@ -7,11 +7,10 @@
         <div class="post-meta">
             {% if page.extra.author_url %}Author: <a class="post-author" href="{{ page.extra.author_url | safe }}">
                 {{ page.extra.author }}
-            </a>
-            {% else %}<span class="post-author">
+            </a><br/>
+            {% elif page.extra.author %}<span class="post-author">
                 Author: {{ page.extra.author }}
-            </span>{% endif %}
-            <br/>
+            </span><br/>{% endif %}
             <span class="post-date">Published: <time>{{ page.date | date(format="%B %e, %Y") }}</time></span>
             <span>&middot;</span>
             <span class="post-reading-time">{{ page.reading_time }} min read</span>

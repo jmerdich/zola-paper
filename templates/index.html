@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        {% block header %}
         <title>{% if page.title %}{{ config.title }} - {{ page.title }}{% else %}{{ config.title }}{% endif %}</title>
 
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -102,6 +103,7 @@
             }
         </script>
         {% endif %}
+        {% endblock %}
     </head>
 
     {% set body_classes = [] %}
